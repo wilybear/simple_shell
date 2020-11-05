@@ -136,7 +136,6 @@ void child_handler(){
   while(waitpid(-1,0,WNOHANG)>0); 
 }
 
-void sig_handler(int signum){
-  
+void sig_handler(){ 
   printf("\n");
-  }
+}
