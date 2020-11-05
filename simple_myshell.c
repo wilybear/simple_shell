@@ -13,6 +13,7 @@ char* cmdvector[MAX_CMD_ARG];
 char  cmdline[BUFSIZ];
 
 void child_handler();
+void sig_handler();
 
 void fatal(char *str){
 	perror(str);
@@ -56,11 +57,19 @@ int main(int argc, char**argv){
   int status;
   int state;
   bool bgflag = false;
-  struct sigaction act;
+  static struct sigaction act;
+  static struct sigaction sig_act;
+  memset(&act,0,sizeof(struct sigaction));
+  memset(&sig_act,0,sizeof(struct sigaction));
   act.sa_handler = child_handler;
   sigemptyset(&act.sa_mask);
   act.sa_flags = SA_RESTART;
 
+  sig_act.sa_handler = sig_handler;
+  sigemptyset(&sig_act.sa_mask);
+
+  signal(SIGQUIT,SIG_IGN);
+  sigaction(SIGINT,&sig_act,0);
   state = sigaction(SIGCHLD,&act,0);
   if(state !=0 ){
     printf("err");
@@ -96,34 +105,26 @@ int main(int argc, char**argv){
         if(i == 0){
           i = makelist(cmdline, " \t", cmdvector, MAX_CMD_ARG);
         }
+        signal(SIGQUIT,SIG_DFL);
+        signal(SIGINT,SIG_DFL);
         if(bgflag==1){
           setpgid(0,0);
-       //   tcsetpgrp(STDIN_FILENO, getpgid(0));
         }
+        // else{
+        //   tcsetpgrp(STDIN_FILENO, getpgid(0)); 
+        // }
         execvp(cmdvector[0], cmdvector);
         
         fatal("main()");  
       case -1:
         fatal("main()");
       default:
-      /*
-        if(bgflag==1){
-            bgflag = 0;
-            printf("bgflag = %d \n",bgflag);
-            waitpid(pid,&status,WNOHANG);
-           }else{
-           printf("waitcalled\n");
-          wait(NULL);
-        }
-        */
        if(bgflag){
           bgflag = false;
        }else{
-        waitpid(pid, NULL, 0);
-       // waitpid(-1,NULL,WNOHANG);
+        waitpid(pid, NULL, 0);        
        }
-				tcsetpgrp(STDIN_FILENO, getpgid(0));
-    }
+	  }
   }
   return 0; 
 }
@@ -132,6 +133,10 @@ int main(int argc, char**argv){
 void child_handler(){
   pid_t child_pid;
   int state; 
-  child_pid = waitpid(-1,0,WNOHANG);
-  
+  while(waitpid(-1,0,WNOHANG)>0); 
 }
+
+void sig_handler(int signum){
+  
+  printf("\n");
+  }
