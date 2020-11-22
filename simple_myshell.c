@@ -63,9 +63,8 @@ int main(int argc, char **argv)
 {
   int i = 0;
   pid_t pid;
-  int pipe_bak=0;
+  int cur_pipe=0;
   int status;
-  int len;
   int state;
   int pipefd[2];
   char* input_file;
@@ -124,8 +123,8 @@ int main(int argc, char **argv)
         read = detect + 1;
         last_pipe_flag = false;
         pipe(pipefd);
-        if(!pipe_bak){
-          pipe_bak = dup(STDIN_FILENO);
+        if(!cur_pipe){
+          cur_pipe= dup(STDIN_FILENO);
         }
     }else{
     i = makelist(read, " \t", cmdvector, MAX_CMD_ARG);
@@ -247,11 +246,12 @@ int main(int argc, char **argv)
         }
         }
         if (last_pipe_flag) {
+          while( waitpid(-1, 0, WNOHANG)>0);
 					close(pipefd[0]);
-					dup2(pipe_bak, STDIN_FILENO);
-					close(pipe_bak);
-					pipe_bak = 0;
-					 last_pipe_flag = false;
+					dup2(cur_pipe, STDIN_FILENO);
+					close(cur_pipe);
+					cur_pipe= 0;
+					last_pipe_flag = false;
 				}
         tcsetpgrp(STDIN_FILENO, getpgid(0));
       }
