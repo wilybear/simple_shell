@@ -1,6 +1,0 @@
-total 32
----------- 1 root root     0 11월 22 21:57 ls.txt
--rwxr-xr-x 1 root root 14048 11월 22 21:44 myshell
--rwxrwxrwx 1 root root  5832 11월 22 20:40 simple_myshell.c
----------- 1 root root   229 11월 22 21:56 test2.txt
----------- 1 root root     6 11월 22 20:02 test.txt
